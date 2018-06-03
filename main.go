@@ -21,6 +21,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	parseList("sample.txt")
+	err = downloadRFCList()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parseList("list.txt")
 	writeOutRandomRFC()
 }
