@@ -21,7 +21,7 @@ var db *sql.DB
 func init() {
 	user := os.Getenv("PG_USER")
 	dbName := os.Getenv("PG_DBNAME")
-	password := os.Getenv("PG_PASSWORd")
+	password := os.Getenv("PG_PASSWORD")
 	sslMode := os.Getenv("PG_SSLMODE")
 	connStr := fmt.Sprintf("user=%s dbname=%s sslmode=%s password=%s", user, dbName, sslMode, password)
 	dbConn, err := sql.Open("postgres", connStr)
