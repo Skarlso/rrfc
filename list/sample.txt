@@ -1,0 +1,84 @@
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                             RFC INDEX
+                           -------------
+
+(CREATED ON: 06/03/2018.)
+
+This file contains citations for all RFCs in numeric order.
+
+RFC citations appear in this format:
+
+  ####  Title of RFC.  Author 1, Author 2, Author 3.  Issue date.
+        (Format: ASCII) (Obsoletes xxx) (Obsoleted by xxx) (Updates xxx)
+        (Updated by xxx) (Also FYI ####) (Status: ssssss) (DOI: ddd)
+
+or
+
+  ####  Not Issued.
+
+For example:
+
+  1129 Internet Time Synchronization: The Network Time Protocol. D.L.
+       Mills. October 1989. (Format: TXT=298, PS=551697, PDF=197036 bytes)
+       (Also RFC1119) (Status: INFORMATIONAL) (DOI: 10.17487/RFC1129)
+
+Key to citations:
+
+#### is the RFC number.
+
+Following the RFC number are the title, the author(s), and the
+publication date of the RFC.  Each of these is terminated by a period.
+
+Following the number are the title (terminated with a period), the
+author, or list of authors (terminated with a period), and the date
+(terminated with a period).
+
+The format and length follow in parenthesis.  One or more of the
+following alternative formats are listed:  ASCII text (TXT), PostScript
+(PS), and/or Adobe (PDF).  Each format is followed by an equals sign
+and the number of bytes for that version.  For example (Format:
+TXT=aaaaa, PS=bbbbbb bytes) shows that the ASCII text version is aaaaa
+bytes, and the PostScript version of the RFC is bbbbbb bytes.
+
+Obsoletes xxxx refers to other RFCs that this one replaces;
+Obsoleted by xxxx refers to RFCs that have replaced this one.
+Updates xxxx refers to other RFCs that this one merely updates but
+does not replace); Updated by xxxx refers to RFCs that have updated
+(but not replaced) this one.  Generally, only immediately succeeding
+and/or preceding RFCs are indicated, not the entire history of each
+related earlier or later RFC in a related series.
+
+The (Also FYI ##) or (Also STD ##) or (Also BCP ##) phrase gives the
+equivalent FYI, STD, or BCP number if the RFC is also in those
+document sub-series.  The Status field gives the document's
+current status (see RFC 2026).  The (DOI ddd) field gives the
+Digital Object Identifier.
+
+RFCs may be obtained in a number of ways, using HTTP, FTP, or email.
+See the RFC Editor Web page http://www.rfc-editor.org
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                                RFC INDEX
+                                ---------
+
+
+
+0001 Host Software. S. Crocker. April 1969. (Format: TXT=21088 bytes)
+     (Status: UNKNOWN) (DOI: 10.17487/RFC0001)
+
+0002 Host software. B. Duvall. April 1969. (Format: TXT=17145 bytes)
+     (Status: UNKNOWN) (DOI: 10.17487/RFC0002)
+
+0003 Documentation conventions. S.D. Crocker. April 1969. (Format:
+     TXT=2323 bytes) (Obsoleted by RFC0010) (Status: UNKNOWN) (DOI:
+     10.17487/RFC0003)
+
+0004 Network timetable. E.B. Shapiro. March 1969. (Format: TXT=5933
+     bytes) (Status: UNKNOWN) (DOI: 10.17487/RFC0004)
+
+0005 Decode Encode Language (DEL). J. Rulifson. June 1969. (Format:
+     TXT=26408 bytes) (Status: UNKNOWN) (DOI: 10.17487/RFC0005)
