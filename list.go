@@ -96,7 +96,6 @@ func parseListConcurrent(list string) error {
 	content, err := ioutil.ReadFile(filepath)
 	split := strings.Split(string(content), "\n")
 	tx, _ := db.Begin()
-	defer tx.Rollback()
 	stmt, _ := tx.Prepare("insert into rfcs values(?, ?)")
 	for len(split) > 0 {
 		segment := len(split) / ChunkCount
