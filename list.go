@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 const (
@@ -87,31 +89,40 @@ func parseList(list string) error {
 }
 
 func parseListConcurrent(list string) error {
+	var wg sync.WaitGroup
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-
 	filepath := filepath.Join(pwd, FilePath, list)
 	content, err := ioutil.ReadFile(filepath)
 	split := strings.Split(string(content), "\n")
 	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare("insert into rfcs values(?, ?)")
-	for len(split) > 0 {
+	for {
 		segment := len(split) / ChunkCount
+		if segment == 0 {
+			wg.Add(1)
+			go handleSegment(split, tx, &wg)
+			break
+		}
 		chunk := make([]string, 0)
-		chunk = append(chunk, split[0:segment]...)
-		split = split[segment:]
-		go handleSegment(chunk, stmt)
+		chunk, split = append(chunk, split[:segment]...), split[segment:]
+		wg.Add(1)
+		go handleSegment(chunk, tx, &wg)
 	}
-	// commit txn
+	wg.Wait()
 	tx.Commit()
 	return nil
 }
 
-func handleSegment(list []string, stmt *sql.Stmt) {
-	re := regexp.MustCompile("^(\\d+) (.*?\\.)")
-	for _, s := range list {
+func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
+	re := regexp.MustCompile("^(\\d+) (.*)")
+	stmt, err := tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	for i, s := range list {
 		var (
 			n    string
 			desc string
@@ -120,10 +131,18 @@ func handleSegment(list []string, stmt *sql.Stmt) {
 		if len(match) > 2 {
 			n = match[1]
 			desc = match[2]
-			stmt.Exec(n, desc)
-			// insertRFC(n, desc)
+			if !strings.ContainsAny(desc, ".") && i+1 < len(list) {
+				desc = strings.Trim(desc, "\n")
+				plus := strings.Trim(list[i+1], "\n")
+				desc += " " + plus
+			}
+			_, err := stmt.Exec(n, desc)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
+	wg.Done()
 }
 
 func getRandomNumber() int {
