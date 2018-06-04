@@ -35,7 +35,7 @@ func createDatabase() error {
 	create := `
 	CREATE TABLE rfcs (
 		id SERIAL NOT NULL,
-        number character varying(100) NOT NULL,
+        number character varying(100) NOT NULL UNIQUE,
 		description character varying(500) NOT NULL
 	)
 	`

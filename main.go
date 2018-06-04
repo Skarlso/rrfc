@@ -25,6 +25,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	parseList("list.txt")
+	parseListConcurrent("list.txt")
 	writeOutRandomRFC()
 }
