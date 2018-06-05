@@ -4,7 +4,6 @@ version: '3.1'
 services:
   db:
     image: postgres
-    restart: always
     ports:
       - 5432:5432
     environment:
@@ -16,10 +15,12 @@ services:
       - /data:/data
     networks:
       - rfcnet
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   rrfc:
     image: skarlso/rrfc
-    restart: always
     ports:
       - 443:443
     networks:
@@ -29,5 +30,8 @@ services:
       PG_DBNAME: ${PG_DBNAME}
       PG_USER: ${PG_USER}
       PG_SSLMODE: ${PG_SSLMODE}
+    deploy:
+      restart_policy:
+        condition: on-failure
 networks:
   rfcnet:
