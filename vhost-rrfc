@@ -27,8 +27,4 @@ server {
     location ~ /(data|conf|bin|inc|.env)/ {
         deny all;
     }
-    location /.well-known/ {
-        # allow all;
-        alias /var/www/html/rrfc;
-    }
 }
