@@ -13,11 +13,11 @@ RUN apt-get update
 RUN apt-get install tzdata
 ENV TZ Europe/Budapest
 RUN apt-get install -y nginx vim make build-essential git php php-fpm curl
-RUN git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
 COPY vhost-rrfc /etc/nginx/sites-available/
 RUN mkdir /var/www/html/rrfc
 RUN mkdir /var/www/html/rrfc/list
 COPY index.php /var/www/html/rrfc/
+COPY background_1.png /var/www/html/rrfc/
 RUN ln -s /etc/nginx/sites-available/vhost-rrfc /etc/nginx/sites-enabled/rrfc
 RUN rm /etc/nginx/sites-enabled/default
 WORKDIR /var/www/html/rrfc
@@ -26,3 +26,8 @@ COPY --from=0 /go/src/github.com/Skarlso/rrfc/rrfc .
 RUN chmod +x rrfc
 
 EXPOSE 443
+
+VOLUME [ "/etc/letsencrypt/" ]
+
+COPY start.sh /root/
+CMD ["/root/start.sh"]

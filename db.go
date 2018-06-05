@@ -23,7 +23,9 @@ func init() {
 	dbName := os.Getenv("PG_DBNAME")
 	password := os.Getenv("PG_PASSWORD")
 	sslMode := os.Getenv("PG_SSLMODE")
-	connStr := fmt.Sprintf("user=%s dbname=%s sslmode=%s password=%s", user, dbName, sslMode, password)
+	host := os.Getenv("PG_HOST")
+	port := os.Getenv("PG_PORT")
+	connStr := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s password=%s", host, port, user, dbName, sslMode, password)
 	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("couldn't open db connection: ", err)

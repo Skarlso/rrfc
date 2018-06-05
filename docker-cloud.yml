@@ -3,7 +3,7 @@ version: '3.1'
 
 services:
   db:
-    image: postgres
+    image: postgres:latest
     ports:
       - 5432:5432
     environment:
@@ -20,7 +20,7 @@ services:
         condition: on-failure
 
   rrfc:
-    image: skarlso/rrfc
+    image: skarlso/rrfc:latest
     ports:
       - 443:443
     networks:
@@ -30,8 +30,12 @@ services:
       PG_DBNAME: ${PG_DBNAME}
       PG_USER: ${PG_USER}
       PG_SSLMODE: ${PG_SSLMODE}
+      PG_HOST: db
+      PG_PORT: 5432
     deploy:
       restart_policy:
         condition: on-failure
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
 networks:
   rfcnet:
