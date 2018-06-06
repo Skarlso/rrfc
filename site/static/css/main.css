@@ -1,0 +1,15 @@
+img#background {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    z-index: -1;
+    bottom: 0;
+    right: 0;
+}
+
+.center {
+    height: auto;
+    margin: auto;
+    padding: 10px;
+    text-align: center;
+}

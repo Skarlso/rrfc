@@ -6,24 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Random RFC</title>
 </head>
-<style>
-    img#background {
-      width: 100%;
-      height: auto;
-      position: fixed;
-      z-index: -1;
-      bottom: 0;
-      right: 0;
-    }
-    .center {
-        height: auto;
-        margin: auto;
-        padding: 10px;
-        text-align: center;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="css/main.css">
 <body>
-    <img id="background" src="background_1.png">
+    <img id="background" src="img/background_1.png">
     <div class="center">
         <h1>
             <?php
