@@ -109,7 +109,8 @@ func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
 				plus := strings.Trim(list[i+1], "\n")
 				desc += " " + plus
 			}
-			_, err := stmt.Exec(n, desc)
+			// TODO: Needs to handle duplicate keys
+			err = execStatement(stmt, n, desc)
 			if err != nil {
 				log.Fatal(err)
 			}

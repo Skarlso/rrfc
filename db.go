@@ -80,7 +80,14 @@ func beginTransaction() (*sql.Tx, error) {
 }
 
 func storeRFC(n, desc string) error {
+	// needs to handle duplicate keys.
 	_, err := db.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
+	return err
+}
+
+func execStatement(stmt *sql.Stmt, n, desc string) error {
+	// handle duplicate entries?
+	_, err := stmt.Exec(n, desc)
 	return err
 }
 
