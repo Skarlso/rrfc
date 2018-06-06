@@ -6,9 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Random RFC</title>
 </head>
-<link rel="stylesheet" type="text/css" href="css/main.css">
+<link rel="stylesheet" type="text/css" href="main.css">
 <body>
-    <img id="background" src="img/background_1.png">
+    <img id="background" src="background_1.png">
     <div class="center">
         <h1>
             <?php
