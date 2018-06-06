@@ -52,6 +52,7 @@ func createDatabase() error {
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "duplicate_table" {
 			fmt.Println("table already exists.")
+			err = nil
 		} else {
 			return err
 		}
@@ -61,6 +62,7 @@ func createDatabase() error {
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "duplicate_table" {
 			fmt.Println("table already exists.")
+			err = nil
 		} else {
 			return err
 		}
