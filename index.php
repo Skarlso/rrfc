@@ -38,7 +38,7 @@
             ?>
         </h1>
     </div>
-    <div id="disqus_thread"></div>
+    <div class ="center" id="disqus_thread"></div>
     <script>
         /**
          *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT

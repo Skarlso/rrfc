@@ -34,26 +34,51 @@ func init() {
 }
 
 func createDatabase() error {
-	create := `
+	createRfcs := `
 	CREATE TABLE rfcs (
 		id SERIAL NOT NULL,
         number character varying(100) NOT NULL UNIQUE,
 		description character varying(500) NOT NULL
 	)
 	`
-	_, err := db.Exec(create)
+	createPreviousRfcs := `
+	CREATE TABLE previous_rfcs (
+		id SERIAL NOT NULL,
+        number character varying(100) NOT NULL UNIQUE,
+		description character varying(500) NOT NULL
+	)
+	`
+	_, err := db.Exec(createRfcs)
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "duplicate_table" {
 			fmt.Println("table already exists.")
-			return nil
+		} else {
+			return err
+		}
+	}
+
+	_, err = db.Exec(createPreviousRfcs)
+	if e, ok := err.(*pq.Error); ok {
+		if e.Code.Name() == "duplicate_table" {
+			fmt.Println("table already exists.")
+		} else {
+			return err
 		}
 	}
 
 	return err
 }
 
-func insertRFC(n string, desc string) error {
-	_, err := db.Exec("insert into rfcs (number, description) values ($1, $2)", n, desc)
+func prepareStatement(tx *sql.Tx) (*sql.Stmt, error) {
+	return tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
+}
+
+func beginTransaction() (*sql.Tx, error) {
+	return db.Begin()
+}
+
+func storeRFC(n, desc string) error {
+	_, err := db.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
 	return err
 }
 

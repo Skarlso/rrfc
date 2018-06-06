@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"database/sql"
 	"fmt"
 	"io"
@@ -62,32 +61,6 @@ func downloadRFCList() error {
 	return nil
 }
 
-func parseList(list string) error {
-	pwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	re := regexp.MustCompile("^(\\d+) (.*?\\.)")
-	filepath := filepath.Join(pwd, FilePath, list)
-	f, err := os.Open(filepath)
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		l := scanner.Text()
-		var (
-			n    string
-			desc string
-		)
-		match := re.FindStringSubmatch(l)
-		if len(match) > 2 {
-			n = match[1]
-			desc = match[2]
-			insertRFC(n, desc)
-		}
-	}
-
-	return nil
-}
-
 func parseListConcurrent(list string) error {
 	var wg sync.WaitGroup
 	pwd, err := os.Getwd()
@@ -97,7 +70,7 @@ func parseListConcurrent(list string) error {
 	filepath := filepath.Join(pwd, FilePath, list)
 	content, err := ioutil.ReadFile(filepath)
 	split := strings.Split(string(content), "\n")
-	tx, _ := db.Begin()
+	tx, _ := beginTransaction()
 	for {
 		segment := len(split) / ChunkCount
 		if segment == 0 {
@@ -117,7 +90,7 @@ func parseListConcurrent(list string) error {
 
 func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
 	re := regexp.MustCompile("^(\\d+) (.*)")
-	stmt, err := tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
+	stmt, err := prepareStatement(tx)
 	if err != nil {
 		log.Fatal(err)
 	}
