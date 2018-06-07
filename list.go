@@ -118,7 +118,3 @@ func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
 	}
 	wg.Done()
 }
-
-func getRandomNumber() int {
-	return 0
-}

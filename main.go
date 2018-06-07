@@ -14,8 +14,6 @@ func writeOutRandomRFC() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// store rfc
 	err = storeRFC(rfc.Number, rfc.Description)
 	if err != nil {
 		log.Fatal(err)
@@ -31,6 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	wipeRfcs()
 	parseListConcurrent("list.txt")
 	writeOutRandomRFC()
 }

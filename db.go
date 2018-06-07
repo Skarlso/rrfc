@@ -82,6 +82,17 @@ func beginTransaction() (*sql.Tx, error) {
 func storeRFC(n, desc string) error {
 	// needs to handle duplicate keys.
 	_, err := db.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
+	if e, ok := err.(*pq.Error); ok {
+		if e.Code.Name() == "unique_violation" {
+			fmt.Println("skipping duplicate entry")
+			return nil
+		}
+	}
+	return err
+}
+
+func wipeRfcs() error {
+	_, err := db.Exec("delete from rfcs")
 	return err
 }
 
