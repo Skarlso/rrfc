@@ -142,7 +142,7 @@ func writeOutAllPreviousRFCHTML() {
 		log.Fatal(err)
 	}
 	for _, rfc := range rfcs {
-		filePath := filepath.Join("site", "previous", rfc.Number+".html")
+		filePath := filepath.Join("previous", rfc.Number+".html")
 		if _, osErr := os.Stat(filePath); osErr == nil {
 			fmt.Println("skipping existing file: ", filePath)
 			continue
