@@ -116,3 +116,20 @@ func getRandomRow() (RFC, error) {
 	}
 	return rfc, nil
 }
+
+func getAllPreviousRFCS() ([]RFC, error) {
+	rfcs := make([]RFC, 0)
+	row, err := db.Query("select number, description from previous_rfcs order by number asc")
+	for row.Next() {
+		var n string
+		var desc string
+		if err = row.Scan(&n, &desc); err != nil {
+			return rfcs, err
+		}
+		rfc := RFC{}
+		rfc.Number = n
+		rfc.Description = desc
+		rfcs = append(rfcs, rfc)
+	}
+	return rfcs, nil
+}

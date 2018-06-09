@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/alecthomas/template"
 )
 
 const (
@@ -117,4 +119,44 @@ func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
 		}
 	}
 	wg.Done()
+}
+
+func writeOutRandomRFC() {
+	rfc, err := getRandomRow()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = ioutil.WriteFile(".rfc", []byte(rfc.Number+":"+rfc.Description), 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = storeRFC(rfc.Number, rfc.Description)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func writeOutAllPreviousRFCHTML() {
+	rfcs, err := getAllPreviousRFCS()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, rfc := range rfcs {
+		filePath := filepath.Join("site", "previous", rfc.Number+".html")
+		if _, osErr := os.Stat(filePath); osErr == nil {
+			fmt.Println("skipping existing file: ", filePath)
+			continue
+		}
+		rfcTemplate, _ := ioutil.ReadFile("rfc.template")
+		t := template.Must(template.New("rfc").Parse(string(rfcTemplate)))
+		f, err := os.Create(filePath)
+		if err != nil {
+			log.Fatal("error while creating file: ", err)
+		}
+		defer f.Close()
+		err = t.Execute(f, rfc)
+		if err != nil {
+			log.Fatal("error writing file: ", err)
+		}
+	}
 }

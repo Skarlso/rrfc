@@ -2,7 +2,8 @@ server {
     server_name rrfc.app;
     root /var/www/html/rrfc;
     location / {
-	index index.php;
+	    index index.php;
+        try_files $uri $uri/ $uri.html $uri.php$is_args$query_string;
     }
     location ~* \.(?:css|js)$ {
         access_log off;

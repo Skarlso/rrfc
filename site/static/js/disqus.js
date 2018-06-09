@@ -1,9 +1,9 @@
 var disqus_config = function () {
     // Replace PAGE_URL with your page's canonical URL variable
-    this.page.url = "https://rrfc.app";
+    id = document.getElementById("number").innerText
+    this.page.url = "https://rrfc.app/previous/" + id;
 
     // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    id = document.getElementById("number").innerText
     this.page.identifier = id;
 };
 (function() {
