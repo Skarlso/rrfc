@@ -1,7 +1,7 @@
 FROM golang
 
 # Build the Go application
-RUN echo "1.3" > /root/version
+RUN echo "1.4" > /root/version
 RUN go get -d -v github.com/Skarlso/rrfc/...
 WORKDIR /go/src/github.com/Skarlso/rrfc
 RUN go build
@@ -13,7 +13,7 @@ LABEL Author="Gergely Brautigam"
 RUN apt-get update
 RUN apt-get install tzdata
 ENV TZ Europe/Budapest
-RUN apt-get install -y nginx vim make build-essential git php php-fpm curl
+RUN apt-get install -y nginx vim make build-essential git php php-fpm curl iputils-ping
 COPY vhost-rrfc /etc/nginx/sites-available/
 RUN mkdir /var/www/html/rrfc
 RUN mkdir /var/www/html/rrfc/list
