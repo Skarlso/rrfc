@@ -10,14 +10,17 @@
 <script src="/static/js/disqus.js"></script>
 <body>
     <?php
-        $files = scandir("./previous", SCANDIR_SORT_ASCENDING);
+        $files = scandir("./files", SCANDIR_SORT_ASCENDING);
     ?>
     <img id="background" src="/static/img/background_1.png">
-    <div class="center">
+    <div class="center" style="overflow-y: scroll">
         <?php
-            foreach ($files as $files) {
-                $base = basename($file);
-                echo "<p><a href='previous/$base'>$base</a></p></br>\n";
+            foreach ($files as $file) {
+                if ($file === "." || $file === "..") {
+                    continue;
+                }
+                $base = basename($file, ".html");
+                echo "<p><a href='files/$base'>$base</a></p>\n";
             }
         ?>
     </div>

@@ -21,7 +21,7 @@
         <h1 id="description">
             <?php print($desc); ?>
         </h1>
-        <a href="previous"><small>Previous RFCS</small></a>
+        <a href="previous.php"><small>Previous RFCS</small></a>
     </div>
     <div class="center" id="disqus_thread"></div>
     <noscript>
