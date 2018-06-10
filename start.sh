@@ -2,21 +2,10 @@
 
 set -e
 
-((count = 30))
-while [[ $count -ne 0 ]] ; do
-    ping -c 1 db
-    rc=$?
-    if [[ $rc -eq 0 ]] ; then
-        ((count = 1))
-    fi
-    ((count = count - 1))
-done
-
-if [[ $rc -eq 0 ]] ; then
-    echo "DB found. Proceeding."
-else
-    echo "Timeout trying to find DB."
-    exit 1
+ping -w 30 -c 1 db
+rc=$?
+if [[ $rc -ne 0 ]]; then
+    echo "Could not find DB."
 fi
 
 /var/www/html/rrfc/rrfc
