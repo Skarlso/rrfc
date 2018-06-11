@@ -11,7 +11,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wipeRfcs()
 	parseListConcurrent("list.txt")
 	writeOutRandomRFC()
 	writeOutAllPreviousRFCHTML()

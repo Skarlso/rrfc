@@ -28,7 +28,19 @@ const (
 	ChunkCount = 100
 )
 
-func downloadRFCList() error {
+// RFC contains an RFC retrieved from the database.
+type RFC struct {
+	Number      string
+	Description string
+	RFCList     []string
+	Storage     Store
+}
+
+func (r *RFC) SetStore(store *Store) {
+	r.Storage = store
+}
+
+func (r *RFC) DownloadRFCList() error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -63,7 +75,7 @@ func downloadRFCList() error {
 	return nil
 }
 
-func parseListConcurrent(list string) error {
+func (r *RFC) ParseListConcurrent(list string) error {
 	var wg sync.WaitGroup
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -89,6 +101,8 @@ func parseListConcurrent(list string) error {
 	tx.Commit()
 	return nil
 }
+
+// TODO: This won't save anything just parse the list. Saving is up to the db implementaiton
 
 func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
 	re := regexp.MustCompile("^(\\d+) (.*)")

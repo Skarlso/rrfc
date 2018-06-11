@@ -10,15 +10,10 @@ import (
 	"github.com/lib/pq"
 )
 
-// RFC contains an RFC retrieved from the database.
-type RFC struct {
-	Number      string
-	Description string
+type PostgresStore struct {
 }
 
-var db *sql.DB
-
-func init() {
+func setup() {
 	user := os.Getenv("PG_USER")
 	dbName := os.Getenv("PG_DBNAME")
 	password := os.Getenv("PG_PASSWORD")
@@ -52,7 +47,8 @@ func createDatabase() error {
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "duplicate_table" {
 			fmt.Println("table already exists.")
-			err = nil
+			fmt.Println("clearing")
+			err = wipeRfcs()
 		} else {
 			return err
 		}
