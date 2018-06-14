@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -34,6 +33,11 @@ type RFC struct {
 	Description string
 	RFCList     []string
 	Storage     Store
+}
+
+type rfcEntity struct {
+	Number      string
+	Description string
 }
 
 func (r *RFC) SetStore(store *Store) {
@@ -99,18 +103,15 @@ func (r *RFC) ParseListConcurrent(list string) error {
 	}
 	wg.Wait()
 	tx.Commit()
+	// safe saveConcurrently(list)
 	return nil
 }
 
 // TODO: This won't save anything just parse the list. Saving is up to the db implementaiton
-
-func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
+func handleSegment(list []string) <-chan rfcEntity {
+	retChannel := make(chan []rfcEntity, 0)
+	defer close(retChannel)
 	re := regexp.MustCompile("^(\\d+) (.*)")
-	stmt, err := prepareStatement(tx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
 	for i, s := range list {
 		var (
 			n    string
@@ -132,7 +133,7 @@ func handleSegment(list []string, tx *sql.Tx, wg *sync.WaitGroup) {
 			}
 		}
 	}
-	wg.Done()
+	return retChannel
 }
 
 func writeOutRandomRFC() {
