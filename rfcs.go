@@ -41,7 +41,7 @@ type rfcEntity struct {
 }
 
 func (r *RFC) SetStore(store *Store) {
-	r.Storage = store
+	r.Storage = *store
 }
 
 func (r *RFC) DownloadRFCList() error {
@@ -79,39 +79,64 @@ func (r *RFC) DownloadRFCList() error {
 	return nil
 }
 
-func (r *RFC) ParseListConcurrent(list string) error {
-	var wg sync.WaitGroup
+// ParseListConcurrent returns a list of parsed rfcEntities
+// which will then be used as by a concurrent transaction save
+// by the db.
+func (r *RFC) parseListConcurrent(list string) []rfcEntity {
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		return []rfcEntity{}
 	}
 	filepath := filepath.Join(pwd, FilePath, list)
 	content, err := ioutil.ReadFile(filepath)
 	split := strings.Split(string(content), "\n")
-	tx, _ := beginTransaction()
+	segmentChannels := make([]<-chan rfcEntity, 0)
 	for {
 		segment := len(split) / ChunkCount
 		if segment == 0 {
-			wg.Add(1)
-			go handleSegment(split, tx, &wg)
+			ch := handleSegment(split)
+			segmentChannels = append(segmentChannels, ch)
 			break
 		}
 		chunk := make([]string, 0)
 		chunk, split = append(chunk, split[:segment]...), split[segment:]
-		wg.Add(1)
-		go handleSegment(chunk, tx, &wg)
+		cs := handleSegment(chunk)
+		segmentChannels = append(segmentChannels, cs)
 	}
-	wg.Wait()
-	tx.Commit()
-	// safe saveConcurrently(list)
-	return nil
+
+	rfcs := make([]rfcEntity, 0)
+	rfcChannel := merge(segmentChannels...)
+	for rfc := range rfcChannel {
+		rfcs = append(rfcs, rfc)
+	}
+	return rfcs
 }
 
-// TODO: This won't save anything just parse the list. Saving is up to the db implementaiton
+func merge(in ...<-chan rfcEntity) <-chan rfcEntity {
+	var wg sync.WaitGroup
+	out := make(chan rfcEntity)
+	wg.Add(len(in))
+	output := func(ch <-chan rfcEntity) {
+		for r := range ch {
+			out <- r
+		}
+		wg.Done()
+	}
+	for _, c := range in {
+		go output(c)
+	}
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
+
 func handleSegment(list []string) <-chan rfcEntity {
-	retChannel := make(chan []rfcEntity, 0)
+	retChannel := make(chan rfcEntity)
 	re := regexp.MustCompile("^(\\d+) (.*)")
-	segmentHandler := func() {
+	go func() {
 		for i, s := range list {
 			var (
 				n    string
@@ -126,17 +151,15 @@ func handleSegment(list []string) <-chan rfcEntity {
 					plus := strings.Trim(list[i+1], "\n")
 					desc += " " + plus
 				}
-				// TODO: Needs to handle duplicate keys
 				r := rfcEntity{
 					Number:      n,
 					Description: desc,
 				}
-				rfcEntity <- r
+				retChannel <- r
 			}
 		}
 		close(retChannel)
-	}
-	go segmentHandler()
+	}()
 	return retChannel
 }
 

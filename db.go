@@ -13,6 +13,8 @@ import (
 type PostgresStore struct {
 }
 
+var db *sql.DB
+
 func setup() {
 	user := os.Getenv("PG_USER")
 	dbName := os.Getenv("PG_DBNAME")
