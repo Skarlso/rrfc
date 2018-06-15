@@ -127,10 +127,11 @@ func handleSegment(list []string) <-chan rfcEntity {
 					desc += " " + plus
 				}
 				// TODO: Needs to handle duplicate keys
-				err = execStatement(stmt, n, desc)
-				if err != nil {
-					log.Fatal(err)
+				r := rfcEntity{
+					Number:      n,
+					Description: desc,
 				}
+				rfcEntity <- r
 			}
 		}
 		close(retChannel)
