@@ -110,29 +110,32 @@ func (r *RFC) ParseListConcurrent(list string) error {
 // TODO: This won't save anything just parse the list. Saving is up to the db implementaiton
 func handleSegment(list []string) <-chan rfcEntity {
 	retChannel := make(chan []rfcEntity, 0)
-	defer close(retChannel)
 	re := regexp.MustCompile("^(\\d+) (.*)")
-	for i, s := range list {
-		var (
-			n    string
-			desc string
-		)
-		match := re.FindStringSubmatch(s)
-		if len(match) > 2 {
-			n = match[1]
-			desc = match[2]
-			if !strings.ContainsAny(desc, ".") && i+1 < len(list) {
-				desc = strings.Trim(desc, "\n")
-				plus := strings.Trim(list[i+1], "\n")
-				desc += " " + plus
-			}
-			// TODO: Needs to handle duplicate keys
-			err = execStatement(stmt, n, desc)
-			if err != nil {
-				log.Fatal(err)
+	segmentHandler := func() {
+		for i, s := range list {
+			var (
+				n    string
+				desc string
+			)
+			match := re.FindStringSubmatch(s)
+			if len(match) > 2 {
+				n = match[1]
+				desc = match[2]
+				if !strings.ContainsAny(desc, ".") && i+1 < len(list) {
+					desc = strings.Trim(desc, "\n")
+					plus := strings.Trim(list[i+1], "\n")
+					desc += " " + plus
+				}
+				// TODO: Needs to handle duplicate keys
+				err = execStatement(stmt, n, desc)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
+		close(retChannel)
 	}
+	go segmentHandler()
 	return retChannel
 }
 
