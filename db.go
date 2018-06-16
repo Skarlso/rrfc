@@ -11,6 +11,23 @@ import (
 )
 
 type PostgresStore struct {
+	*sql.DB
+}
+
+func (ps *PostgresStore) Store(string, string) {
+
+}
+
+func (ps *PostgresStore) StoreConcurrently([]string) {
+
+}
+
+func (ps *PostgresStore) LoadRandom() RFC {
+	return RFC{}
+}
+
+func (ps *PostgresStore) LoadAllPrevious() []RFC {
+	return []RFC{}
 }
 
 var db *sql.DB
