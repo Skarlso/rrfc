@@ -14,25 +14,7 @@ type PostgresStore struct {
 	*sql.DB
 }
 
-func (ps *PostgresStore) Store(string, string) {
-
-}
-
-func (ps *PostgresStore) StoreConcurrently([]string) {
-
-}
-
-func (ps *PostgresStore) LoadRandom() RFC {
-	return RFC{}
-}
-
-func (ps *PostgresStore) LoadAllPrevious() []RFC {
-	return []RFC{}
-}
-
-var db *sql.DB
-
-func setup() {
+func (ps *PostgresStore) setupConnection() {
 	user := os.Getenv("PG_USER")
 	dbName := os.Getenv("PG_DBNAME")
 	password := os.Getenv("PG_PASSWORD")
@@ -44,10 +26,10 @@ func setup() {
 	if err != nil {
 		log.Fatal("couldn't open db connection: ", err)
 	}
-	db = dbConn
+	ps.DB = dbConn
 }
 
-func createDatabase() error {
+func (ps *PostgresStore) CreateStore() error {
 	createRfcs := `
 	CREATE TABLE rfcs (
 		id SERIAL NOT NULL,
@@ -62,18 +44,18 @@ func createDatabase() error {
 		description character varying(500) NOT NULL
 	)
 	`
-	_, err := db.Exec(createRfcs)
+	_, err := ps.Exec(createRfcs)
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "duplicate_table" {
 			fmt.Println("table already exists.")
 			fmt.Println("clearing")
-			err = wipeRfcs()
+			err = ps.Wipe()
 		} else {
 			return err
 		}
 	}
 
-	_, err = db.Exec(createPreviousRfcs)
+	_, err = ps.Exec(createPreviousRfcs)
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "duplicate_table" {
 			fmt.Println("table already exists.")
@@ -86,17 +68,9 @@ func createDatabase() error {
 	return err
 }
 
-func prepareStatement(tx *sql.Tx) (*sql.Stmt, error) {
-	return tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
-}
-
-func beginTransaction() (*sql.Tx, error) {
-	return db.Begin()
-}
-
-func storeRFC(n, desc string) error {
+func (ps *PostgresStore) StoreRFC(n, desc string) error {
 	// needs to handle duplicate keys.
-	_, err := db.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
+	_, err := ps.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
 	if e, ok := err.(*pq.Error); ok {
 		if e.Code.Name() == "unique_violation" {
 			fmt.Println("skipping duplicate entry")
@@ -106,20 +80,30 @@ func storeRFC(n, desc string) error {
 	return err
 }
 
-func wipeRfcs() error {
-	_, err := db.Exec("delete from rfcs")
+func (ps *PostgresStore) Wipe() error {
+	_, err := ps.Exec("delete from rfcs")
 	return err
 }
 
-func execStatement(stmt *sql.Stmt, n, desc string) error {
-	// handle duplicate entries?
-	_, err := stmt.Exec(n, desc)
-	return err
-}
+// var db *sql.DB
 
-func getRandomRow() (RFC, error) {
+// func prepareStatement(tx *sql.Tx) (*sql.Stmt, error) {
+// 	return tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
+// }
+
+// func beginTransaction() (*sql.Tx, error) {
+// 	return db.Begin()
+// }
+
+// func execStatement(stmt *sql.Stmt, n, desc string) error {
+// 	// handle duplicate entries?
+// 	_, err := stmt.Exec(n, desc)
+// 	return err
+// }
+
+func (ps *PostgresStore) LoadRandom() (RFC, error) {
 	rfc := RFC{}
-	row, err := db.Query("select number, description from rfcs order by random() limit 1")
+	row, err := ps.Query("select number, description from rfcs order by random() limit 1")
 	for row.Next() {
 		var n string
 		var desc string
@@ -132,9 +116,24 @@ func getRandomRow() (RFC, error) {
 	return rfc, nil
 }
 
-func getAllPreviousRFCS() ([]RFC, error) {
+func (ps *PostgresStore) StoreList(rfcs []rfcEntity) {
+	tx, _ := ps.Begin()
+	stmt, err := tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
+	if err != nil {
+		log.Fatal("error while preparing statement: ", err)
+	}
+	for _, r := range rfcs {
+		_, err := stmt.Exec(r.Number, r.Description)
+		if err != nil {
+			log.Fatal("error while executing statement: ", err)
+		}
+	}
+	tx.Commit()
+}
+
+func (ps *PostgresStore) LoadAllPrevious() ([]RFC, error) {
 	rfcs := make([]RFC, 0)
-	row, err := db.Query("select number, description from previous_rfcs order by number asc")
+	row, err := ps.Query("select number, description from previous_rfcs order by number asc")
 	for row.Next() {
 		var n string
 		var desc string

@@ -40,8 +40,8 @@ type rfcEntity struct {
 	Description string
 }
 
-func (r *RFC) SetStore(store *Store) {
-	r.Storage = *store
+func (r *RFC) SetStore(store Store) {
+	r.Storage = store
 }
 
 func (r *RFC) DownloadRFCList() error {
@@ -163,8 +163,8 @@ func handleSegment(list []string) <-chan rfcEntity {
 	return retChannel
 }
 
-func writeOutRandomRFC() {
-	rfc, err := getRandomRow()
+func (r *RFC) WriteOutRandomRFC() {
+	rfc, err := r.Storage.LoadRandom()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,14 +172,14 @@ func writeOutRandomRFC() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = storeRFC(rfc.Number, rfc.Description)
+	err = r.Storage.StoreRFC(rfc.Number, rfc.Description)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func writeOutAllPreviousRFCHTML() {
-	rfcs, err := getAllPreviousRFCS()
+func (r *RFC) WriteOutAllPreviousRFCHTML() {
+	rfcs, err := r.Storage.LoadAllPrevious()
 	if err != nil {
 		log.Fatal(err)
 	}

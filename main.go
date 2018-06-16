@@ -1,20 +1,16 @@
 package main
 
-import "log"
-
 func main() {
-	// err := createDatabase()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// err = downloadRFCList()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// parseListConcurrent("list.txt")
-	// writeOutRandomRFC()
-	// writeOutAllPreviousRFCHTML()
 	rfc := new(RFC)
+	pgStore := new(PostgresStore)
+	rfc.SetStore(pgStore)
+
+	pgStore.CreateStore()
+
+	rfc.DownloadRFCList()
 	rfcs := rfc.parseListConcurrent("list.txt")
-	log.Println("len: ", len(rfcs))
+	pgStore.StoreList(rfcs)
+
+	rfc.WriteOutRandomRFC()
+	rfc.WriteOutAllPreviousRFCHTML()
 }

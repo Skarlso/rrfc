@@ -2,8 +2,10 @@ package main
 
 // Store describes a storage mechanism.
 type Store interface {
-	Store(string, string)
-	StoreConcurrently([]string)
-	LoadRandom() RFC
-	LoadAllPrevious() []RFC
+	StoreRFC(string, string) error
+	StoreList([]rfcEntity)
+	LoadRandom() (RFC, error)
+	LoadAllPrevious() ([]RFC, error)
+	Wipe() error
+	CreateStore() error
 }
