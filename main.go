@@ -1,11 +1,17 @@
 package main
 
+import "log"
+
 func main() {
 	rfc := new(RFC)
 	pgStore := new(PostgresStore)
+	pgStore.Connect()
 	rfc.SetStore(pgStore)
 
-	pgStore.CreateStore()
+	err := pgStore.CreateStore()
+	if err != nil {
+		log.Fatal("error creating store:", err)
+	}
 
 	rfc.DownloadRFCList()
 	rfcs := rfc.parseListConcurrent("list.txt")

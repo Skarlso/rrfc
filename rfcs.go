@@ -40,10 +40,13 @@ type rfcEntity struct {
 	Description string
 }
 
+// SetStore sets up a store implementation for RFC to use
+// Use DUMMY store here in order to unit test RFC.
 func (r *RFC) SetStore(store Store) {
 	r.Storage = store
 }
 
+// DownloadRFCList gets a list of all available RFCs
 func (r *RFC) DownloadRFCList() error {
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -163,6 +166,9 @@ func handleSegment(list []string) <-chan rfcEntity {
 	return retChannel
 }
 
+// WriteOutRandomRFC creates a file called .rfc where a random rfc is stored.
+// This is done so the web application can get the number from a file rather then
+// having to implement database access in the main semi-static HTML file.
 func (r *RFC) WriteOutRandomRFC() {
 	rfc, err := r.Storage.LoadRandom()
 	if err != nil {
@@ -178,6 +184,9 @@ func (r *RFC) WriteOutRandomRFC() {
 	}
 }
 
+// WriteOutAllPreviousRFCHTML creates HTML static files for all previous RFCs
+// that were once selected. This is so disqus has a permanent link to point to
+// when viewing past conversations and for convenience.
 func (r *RFC) WriteOutAllPreviousRFCHTML() {
 	rfcs, err := r.Storage.LoadAllPrevious()
 	if err != nil {

@@ -8,4 +8,5 @@ type Store interface {
 	LoadAllPrevious() ([]RFC, error)
 	Wipe() error
 	CreateStore() error
+	Connect()
 }

@@ -10,11 +10,13 @@ import (
 	"github.com/lib/pq"
 )
 
+// PostgresStore is a Store backed by Postgres type database.
 type PostgresStore struct {
 	*sql.DB
 }
 
-func (ps *PostgresStore) setupConnection() {
+// Connect to a store.
+func (ps *PostgresStore) Connect() {
 	user := os.Getenv("PG_USER")
 	dbName := os.Getenv("PG_DBNAME")
 	password := os.Getenv("PG_PASSWORD")
@@ -29,6 +31,8 @@ func (ps *PostgresStore) setupConnection() {
 	ps.DB = dbConn
 }
 
+// CreateStore creates a store backend to be used. This function contains setup
+// for any kind of store, ie. create tables or files.
 func (ps *PostgresStore) CreateStore() error {
 	createRfcs := `
 	CREATE TABLE rfcs (
@@ -68,6 +72,7 @@ func (ps *PostgresStore) CreateStore() error {
 	return err
 }
 
+// StoreRFC stores a single RFC.
 func (ps *PostgresStore) StoreRFC(n, desc string) error {
 	// needs to handle duplicate keys.
 	_, err := ps.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
@@ -80,27 +85,14 @@ func (ps *PostgresStore) StoreRFC(n, desc string) error {
 	return err
 }
 
+// Wipe wipes the main database. The idea is rather than doing an upsert or a
+// checked insert, we just clear everything and store everything on the weekly cycle.
 func (ps *PostgresStore) Wipe() error {
 	_, err := ps.Exec("delete from rfcs")
 	return err
 }
 
-// var db *sql.DB
-
-// func prepareStatement(tx *sql.Tx) (*sql.Stmt, error) {
-// 	return tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
-// }
-
-// func beginTransaction() (*sql.Tx, error) {
-// 	return db.Begin()
-// }
-
-// func execStatement(stmt *sql.Stmt, n, desc string) error {
-// 	// handle duplicate entries?
-// 	_, err := stmt.Exec(n, desc)
-// 	return err
-// }
-
+// LoadRandom gives back a random RFC.
 func (ps *PostgresStore) LoadRandom() (RFC, error) {
 	rfc := RFC{}
 	row, err := ps.Query("select number, description from rfcs order by random() limit 1")
@@ -116,8 +108,13 @@ func (ps *PostgresStore) LoadRandom() (RFC, error) {
 	return rfc, nil
 }
 
+// StoreList stores an entire list of RFCs. This is done via a transaction here
+// so that it is a single commit instead of several thousand.
 func (ps *PostgresStore) StoreList(rfcs []rfcEntity) {
-	tx, _ := ps.Begin()
+	tx, err := ps.Begin()
+	if err != nil {
+		log.Fatal("error beginning transaction: ", err)
+	}
 	stmt, err := tx.Prepare("insert into rfcs (number, description) values ($1, $2)")
 	if err != nil {
 		log.Fatal("error while preparing statement: ", err)
@@ -131,6 +128,8 @@ func (ps *PostgresStore) StoreList(rfcs []rfcEntity) {
 	tx.Commit()
 }
 
+// LoadAllPrevious is used to load all previous randomly selected rfcs in order
+// to create a static html file for them.
 func (ps *PostgresStore) LoadAllPrevious() ([]RFC, error) {
 	rfcs := make([]RFC, 0)
 	row, err := ps.Query("select number, description from previous_rfcs order by number asc")
