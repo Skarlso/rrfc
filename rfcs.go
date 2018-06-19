@@ -90,7 +90,7 @@ func (r *RFC) parseListConcurrent(list string) []rfcEntity {
 	if err != nil {
 		return []rfcEntity{}
 	}
-	filepath := filepath.Join(pwd, FilePath, list)
+	filepath := filepath.Join(pwd, list)
 	content, err := ioutil.ReadFile(filepath)
 	split := strings.Split(string(content), "\n")
 	segmentChannels := make([]<-chan rfcEntity, 0)

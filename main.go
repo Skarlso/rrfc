@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"log"
+	"path/filepath"
+)
 
 func main() {
 	rfc := new(RFC)
@@ -14,7 +17,7 @@ func main() {
 	}
 
 	rfc.DownloadRFCList()
-	rfcs := rfc.parseListConcurrent("list.txt")
+	rfcs := rfc.parseListConcurrent(filepath.Join(FilePath, "list.txt"))
 	pgStore.StoreList(rfcs)
 
 	rfc.WriteOutRandomRFC()
