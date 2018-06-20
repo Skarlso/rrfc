@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/alecthomas/template"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 const (
@@ -173,7 +174,8 @@ func (r *RFC) WriteOutRandomRFC() {
 	if err != nil {
 		logFatal(err)
 	}
-	err = ioutil.WriteFile(".rfc", []byte(rfc.Number+":"+rfc.Description), 0644)
+	rfcFilename := os.Getenv("RFC_FILENAME")
+	err = ioutil.WriteFile(rfcFilename, []byte(rfc.Number+":"+rfc.Description), 0644)
 	if err != nil {
 		logFatal(err)
 	}
@@ -191,8 +193,9 @@ func (r *RFC) WriteOutAllPreviousRFCHTML() {
 	if err != nil {
 		logFatal(err)
 	}
+	base := os.Getenv("SITE_LOCATION")
 	for _, rfc := range rfcs {
-		filePath := filepath.Join("files", rfc.Number+".html")
+		filePath := filepath.Join(base, "files", rfc.Number+".html")
 		if _, osErr := os.Stat(filePath); osErr == nil {
 			fmt.Println("skipping existing file: ", filePath)
 			continue

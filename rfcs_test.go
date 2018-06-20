@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -56,6 +57,7 @@ func TestWriteOutRandomRFCFailLoadRandom(t *testing.T) {
 }
 
 func TestWriteOutRandomRFCFailWritingFile(t *testing.T) {
+	os.Setenv("RFC_FILENAME", "")
 	called := false
 	logFatal = func(...interface{}) {
 		called = true
@@ -67,5 +69,22 @@ func TestWriteOutRandomRFCFailWritingFile(t *testing.T) {
 	rfc.WriteOutRandomRFC()
 	if !called {
 		t.Fatal("logFatal was not called")
+	}
+}
+
+func TestWriteOutRandomStoringRFCWorks(t *testing.T) {
+	os.Setenv("RFC_FILENAME", ".rfc")
+	called := false
+	logFatal = func(...interface{}) {
+		called = true
+	}
+	rfc := new(RFC)
+	ds := new(dummyStore)
+	ds.RFC = RFC{Number: "0001", Description: "Description"}
+	ds.Error = nil
+	rfc.SetStore(ds)
+	rfc.WriteOutRandomRFC()
+	if called {
+		t.Fatal("logFatal was called")
 	}
 }
