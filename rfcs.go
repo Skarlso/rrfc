@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -172,15 +171,15 @@ func handleSegment(list []string) <-chan rfcEntity {
 func (r *RFC) WriteOutRandomRFC() {
 	rfc, err := r.Storage.LoadRandom()
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	err = ioutil.WriteFile(".rfc", []byte(rfc.Number+":"+rfc.Description), 0644)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	err = r.Storage.StoreRFC(rfc.Number, rfc.Description)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 }
 
@@ -190,7 +189,7 @@ func (r *RFC) WriteOutRandomRFC() {
 func (r *RFC) WriteOutAllPreviousRFCHTML() {
 	rfcs, err := r.Storage.LoadAllPrevious()
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	for _, rfc := range rfcs {
 		filePath := filepath.Join("files", rfc.Number+".html")
@@ -202,12 +201,12 @@ func (r *RFC) WriteOutAllPreviousRFCHTML() {
 		t := template.Must(template.New("rfc").Parse(string(rfcTemplate)))
 		f, err := os.Create(filePath)
 		if err != nil {
-			log.Fatal("error while creating file: ", err)
+			logFatal("error while creating file: ", err)
 		}
 		defer f.Close()
 		err = t.Execute(f, rfc)
 		if err != nil {
-			log.Fatal("error writing file: ", err)
+			logFatal("error writing file: ", err)
 		}
 	}
 }

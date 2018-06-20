@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 )
 
+var logFatal = log.Fatal
+
 func main() {
 	rfc := new(RFC)
 	pgStore := new(PostgresStore)
@@ -13,7 +15,7 @@ func main() {
 
 	err := pgStore.CreateStore()
 	if err != nil {
-		log.Fatal("error creating store:", err)
+		logFatal("error creating store:", err)
 	}
 
 	rfc.DownloadRFCList()
