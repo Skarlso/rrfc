@@ -130,7 +130,7 @@ func TestFileDownloadFailedHttpStatus(t *testing.T) {
 		message = args[0].(string)
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "danger will robinson", 500)
+		http.Error(w, "danger", 500)
 	}))
 	defer ts.Close()
 	os.Setenv("LIST_LOCATION", ts.URL)
