@@ -2,12 +2,27 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 )
+
+// var (
+// 	mux
+// )
+
+// func tempUrl() string {
+// 	mux := http.NewServeMux()
+// 	server := httptest.NewServer(mux)
+// 	url, _ := url.Parse(server.URL)
+// 	return url
+// }
 
 func TestParseListConcurrent(t *testing.T) {
 	expected := []rfcEntity{
@@ -86,5 +101,45 @@ func TestWriteOutRandomStoringRFCWorks(t *testing.T) {
 	rfc.WriteOutRandomRFC()
 	if called {
 		t.Fatal("logFatal was called")
+	}
+}
+
+func TestFileDownload(t *testing.T) {
+	called := false
+	logFatal = func(args ...interface{}) {
+		called = true
+		log.Println(args)
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "test_content")
+	}))
+	defer ts.Close()
+	os.Setenv("LIST_LOCATION", ts.URL)
+	rfc := new(RFC)
+	rfc.DownloadRFCList()
+	if called {
+		t.Fatal("logFatal was called")
+	}
+}
+
+func TestFileDownloadFailedHttpStatus(t *testing.T) {
+	called := false
+	var message string
+	logFatal = func(args ...interface{}) {
+		called = true
+		message = args[0].(string)
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "danger will robinson", 500)
+	}))
+	defer ts.Close()
+	os.Setenv("LIST_LOCATION", ts.URL)
+	rfc := new(RFC)
+	rfc.DownloadRFCList()
+	if !called {
+		t.Fatal("logFatal was not called")
+	}
+	if message != "bad status: 500 Internal Server Error" {
+		t.Fatal("error not picked up")
 	}
 }

@@ -47,39 +47,39 @@ func (r *RFC) SetStore(store Store) {
 }
 
 // DownloadRFCList gets a list of all available RFCs
-func (r *RFC) DownloadRFCList() error {
+func (r *RFC) DownloadRFCList() {
+	listLocation := os.Getenv("LIST_LOCATION")
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		logFatal(err)
 	}
 
 	filepath := filepath.Join(pwd, FilePath, FileName)
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
-		return err
+		logFatal(err)
 	}
 	defer out.Close()
 
 	// Get the data
-	resp, err := http.Get(ListLocation)
+	resp, err := http.Get(listLocation)
 	if err != nil {
-		return err
+		logFatal(err)
 	}
 	defer resp.Body.Close()
 
 	// Check server response
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status: %s", resp.Status)
+		message := fmt.Sprintf("bad status: %s", resp.Status)
+		logFatal(message)
 	}
 
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
-		return err
+		logFatal(err)
 	}
-
-	return nil
 }
 
 // ParseListConcurrent returns a list of parsed rfcEntities
