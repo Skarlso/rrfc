@@ -48,7 +48,7 @@ func (r *RFC) SetStore(store Store) {
 
 // DownloadRFCList gets a list of all available RFCs
 func (r *RFC) DownloadRFCList() {
-	listLocation := os.Getenv("LIST_LOCATION")
+	listLocation := os.Getenv("LIST_URL")
 	pwd, err := os.Getwd()
 	if err != nil {
 		logFatal(err)

@@ -32,6 +32,8 @@ services:
       PG_SSLMODE: ${PG_SSLMODE}
       PG_HOST: db
       PG_PORT: 5432
+      SITE_LOCATION: site
+      LIST_URL: "https://www.ietf.org/download/rfc-index.txt"
     deploy:
       restart_policy:
         condition: on-failure

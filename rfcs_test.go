@@ -114,7 +114,7 @@ func TestFileDownload(t *testing.T) {
 		fmt.Fprintln(w, "test_content")
 	}))
 	defer ts.Close()
-	os.Setenv("LIST_LOCATION", ts.URL)
+	os.Setenv("LIST_URL", ts.URL)
 	rfc := new(RFC)
 	rfc.DownloadRFCList()
 	if called {
@@ -133,7 +133,7 @@ func TestFileDownloadFailedHttpStatus(t *testing.T) {
 		http.Error(w, "danger", 500)
 	}))
 	defer ts.Close()
-	os.Setenv("LIST_LOCATION", ts.URL)
+	os.Setenv("LIST_URL", ts.URL)
 	rfc := new(RFC)
 	rfc.DownloadRFCList()
 	if !called {
