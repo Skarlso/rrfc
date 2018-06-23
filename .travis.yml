@@ -1,7 +1,13 @@
 language: go
 
+services:
+  - postgresql
+
 go:
   - master
+
+before_script:
+  - cp config/database.yml.travis config/database.yml
 
 script:
     - go test

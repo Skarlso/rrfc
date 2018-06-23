@@ -2,7 +2,7 @@ package main
 
 // Store describes a storage mechanism.
 type Store interface {
-	StoreRFC(string, string) error
+	StorePreviousRFC(string, string) error
 	StoreList([]rfcEntity)
 	LoadRandom() (RFC, error)
 	LoadAllPrevious() ([]RFC, error)
@@ -17,7 +17,7 @@ type dummyStore struct {
 	RFCS  []RFC
 }
 
-func (ds *dummyStore) StoreRFC(string, string) error {
+func (ds *dummyStore) StorePreviousRFC(string, string) error {
 	return ds.Error
 }
 func (ds *dummyStore) StoreList([]rfcEntity) {

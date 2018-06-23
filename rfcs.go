@@ -179,7 +179,7 @@ func (r *RFC) WriteOutRandomRFC() {
 	if err != nil {
 		logFatal(err)
 	}
-	err = r.Storage.StoreRFC(rfc.Number, rfc.Description)
+	err = r.Storage.StorePreviousRFC(rfc.Number, rfc.Description)
 	if err != nil {
 		logFatal(err)
 	}

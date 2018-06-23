@@ -72,8 +72,8 @@ func (ps *PostgresStore) CreateStore() error {
 	return err
 }
 
-// StoreRFC stores a single RFC.
-func (ps *PostgresStore) StoreRFC(n, desc string) error {
+// StorePreviousRFC stores a single RFC.
+func (ps *PostgresStore) StorePreviousRFC(n, desc string) error {
 	// needs to handle duplicate keys.
 	_, err := ps.Exec("insert into previous_rfcs (number, description) values ($1, $2)", n, desc)
 	if e, ok := err.(*pq.Error); ok {

@@ -1,0 +1,5 @@
+postgres:
+  adapter: postgresql
+  database: rfcs
+  username: rrfc
+  password: password123
