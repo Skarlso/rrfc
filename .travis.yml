@@ -10,4 +10,4 @@ before_script:
   - cp config/database.yml.travis config/database.yml
 
 script:
-    - go test
+    - go test -v
