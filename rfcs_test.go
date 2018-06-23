@@ -13,17 +13,6 @@ import (
 	"testing"
 )
 
-// var (
-// 	mux
-// )
-
-// func tempUrl() string {
-// 	mux := http.NewServeMux()
-// 	server := httptest.NewServer(mux)
-// 	url, _ := url.Parse(server.URL)
-// 	return url
-// }
-
 func TestParseListConcurrent(t *testing.T) {
 	expected := []rfcEntity{
 		rfcEntity{"0001", "Host Software. S. Crocker. April 1969. (Format: TXT=21088 bytes)"},
@@ -142,4 +131,41 @@ func TestFileDownloadFailedHttpStatus(t *testing.T) {
 	if message != "bad status: 500 Internal Server Error" {
 		t.Fatal("error not picked up")
 	}
+}
+
+func cleanupFiles(file string) {
+	os.Remove(filepath.Join("fixture", "files", file))
+}
+
+func TestWriteOutAllPreviousRFCHTML(t *testing.T) {
+	os.Setenv("SITE_LOCATION", "fixture")
+	defer cleanupFiles("0001.html")
+	rfc := new(RFC)
+	psql := new(dummyStore)
+	rfcs := []RFC{
+		RFC{Number: "0001", Description: "Description"},
+	}
+	psql.RFCS = rfcs
+	rfc.SetStore(psql)
+	rfc.WriteOutAllPreviousRFCHTML()
+	if _, err := os.Stat(filepath.Join("fixture", "files", "0001.html")); err != nil {
+		t.Fatal("generated file at expected location not found")
+	}
+}
+
+func TestWriteOutAllPreviousRFCHTMLSkippingExistingFiles(t *testing.T) {
+	os.Setenv("SITE_LOCATION", "fixture")
+	defer cleanupFiles("0001.html")
+	rfc := new(RFC)
+	psql := new(dummyStore)
+	rfcs := []RFC{
+		RFC{Number: "0001", Description: "Description"},
+	}
+	psql.RFCS = rfcs
+	rfc.SetStore(psql)
+	rfc.WriteOutAllPreviousRFCHTML()
+	if _, err := os.Stat(filepath.Join("fixture", "files", "0001.html")); err != nil {
+		t.Fatal("generated file at expected location not found")
+	}
+	rfc.WriteOutAllPreviousRFCHTML()
 }
