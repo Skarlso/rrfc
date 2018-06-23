@@ -1,7 +1,7 @@
 FROM golang
 
 # Build the Go application
-RUN echo "1.4" > /root/version
+RUN echo "1.5" > /root/version
 RUN go get -d -v github.com/Skarlso/rrfc/...
 WORKDIR /go/src/github.com/Skarlso/rrfc
 RUN go build
