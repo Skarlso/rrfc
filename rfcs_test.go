@@ -13,6 +13,34 @@ import (
 	"testing"
 )
 
+type dummyStore struct {
+	Error error
+	RFC   RFC
+	RFCS  []RFC
+}
+
+func (ds *dummyStore) StorePreviousRFC(string, string) error {
+	return ds.Error
+}
+func (ds *dummyStore) StoreList([]rfcEntity) {
+
+}
+func (ds *dummyStore) LoadRandom() (RFC, error) {
+	return ds.RFC, ds.Error
+}
+func (ds *dummyStore) LoadAllPrevious() ([]RFC, error) {
+	return ds.RFCS, ds.Error
+}
+func (ds *dummyStore) Wipe() error {
+	return ds.Error
+}
+func (ds *dummyStore) CreateStore() error {
+	return ds.Error
+}
+func (ds *dummyStore) Connect() {
+
+}
+
 func TestParseListConcurrent(t *testing.T) {
 	expected := []rfcEntity{
 		rfcEntity{"0001", "Host Software. S. Crocker. April 1969. (Format: TXT=21088 bytes)"},
