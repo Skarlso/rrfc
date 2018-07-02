@@ -13,6 +13,7 @@ import (
 
 	"github.com/alecthomas/template"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -26,6 +27,13 @@ const (
 	// ChunkCount is the number of items the list is diveded into.
 	ChunkCount = 100
 )
+
+// HandleOrFail will handle an error.
+func handleOrFail(err error, message string) {
+	if err != nil {
+		logFatal(errors.Wrap(err, message))
+	}
+}
 
 // RFC contains an RFC retrieved from the database.
 type RFC struct {
@@ -50,23 +58,17 @@ func (r *RFC) SetStore(store Store) {
 func (r *RFC) DownloadRFCList() {
 	listLocation := os.Getenv("LIST_URL")
 	pwd, err := os.Getwd()
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed os.Getwd()")
 
 	filepath := filepath.Join(pwd, FilePath, FileName)
 	// Create the file
 	out, err := os.Create(filepath)
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed calling os.Create")
 	defer out.Close()
 
 	// Get the data
 	resp, err := http.Get(listLocation)
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed calling http.Get")
 	defer resp.Body.Close()
 
 	// Check server response
@@ -77,9 +79,7 @@ func (r *RFC) DownloadRFCList() {
 
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed calling io.Copy")
 }
 
 // ParseListConcurrent returns a list of parsed rfcEntities
@@ -166,23 +166,14 @@ func handleSegment(list []string) <-chan rfcEntity {
 	return retChannel
 }
 
-// WriteOutRandomRFC creates a file called .rfc where a random rfc is stored.
-// This is done so the web application can get the number from a file rather then
-// having to implement database access in the main semi-static HTML file.
-func (r *RFC) WriteOutRandomRFC() {
+// GetRandomRFC retrieves a random RFC via sql and stores it
+// in the list of previously loaded RFCs.
+func (r *RFC) GetRandomRFC() RFC {
 	rfc, err := r.Storage.LoadRandom()
-	if err != nil {
-		logFatal(err)
-	}
-	rfcFilename := os.Getenv("RFC_FILENAME")
-	err = ioutil.WriteFile(rfcFilename, []byte(rfc.Number+":"+rfc.Description), 0644)
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed loading random rfc")
 	err = r.Storage.StorePreviousRFC(rfc.Number, rfc.Description)
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed storing previous rfc")
+	return rfc
 }
 
 // WriteOutAllPreviousRFCHTML creates HTML static files for all previous RFCs
@@ -190,9 +181,7 @@ func (r *RFC) WriteOutRandomRFC() {
 // when viewing past conversations and for convenience.
 func (r *RFC) WriteOutAllPreviousRFCHTML() {
 	rfcs, err := r.Storage.LoadAllPrevious()
-	if err != nil {
-		logFatal(err)
-	}
+	handleOrFail(err, "failed loading previous rfcs")
 	base := os.Getenv("SITE_LOCATION")
 	for _, rfc := range rfcs {
 		filePath := filepath.Join(base, "files", rfc.Number+".html")
@@ -203,13 +192,46 @@ func (r *RFC) WriteOutAllPreviousRFCHTML() {
 		rfcTemplate, _ := ioutil.ReadFile("rfc.template")
 		t := template.Must(template.New("rfc").Parse(string(rfcTemplate)))
 		f, err := os.Create(filePath)
-		if err != nil {
-			logFatal("error while creating file: ", err)
-		}
+		handleOrFail(err, "failed creating file")
 		defer f.Close()
 		err = t.Execute(f, rfc)
-		if err != nil {
-			logFatal("error writing file: ", err)
-		}
+		handleOrFail(err, "failed executing template")
 	}
+}
+
+// WriteOutPreviousHTML creates the static previous HTML page
+// which contains the links to all the generated previous RFC pages.
+func (r *RFC) WriteOutPreviousHTML() {
+	rfcs, err := r.Storage.LoadAllPrevious()
+	handleOrFail(err, "failed loading previous rfcs")
+	base := os.Getenv("SITE_LOCATION")
+	// Link name is rfc.Number
+	rfcTemplate, _ := ioutil.ReadFile("previous.template")
+	t := template.Must(template.New("prev").Parse(string(rfcTemplate)))
+	filePath := filepath.Join(base, "previous.html")
+	if _, osErr := os.Stat(filePath); osErr == nil {
+		os.Remove(filePath)
+	}
+	f, err := os.Create(filePath)
+	handleOrFail(err, "failed to create previous.html")
+	defer f.Close()
+	err = t.Execute(f, rfcs)
+	handleOrFail(err, "failed to execute template")
+}
+
+// WriteOutIndexHTML creates the index file for RRFC.
+func (r *RFC) WriteOutIndexHTML(rrfc RFC) {
+	base := os.Getenv("SITE_LOCATION")
+	// Link name is rfc.Number
+	indexTemplate, _ := ioutil.ReadFile("index.template")
+	t := template.Must(template.New("index").Parse(string(indexTemplate)))
+	filePath := filepath.Join(base, "index.html")
+	if _, osErr := os.Stat(filePath); osErr == nil {
+		os.Remove(filePath)
+	}
+	f, err := os.Create(filePath)
+	handleOrFail(err, "failed to create previous.html")
+	defer f.Close()
+	err = t.Execute(f, rrfc)
+	handleOrFail(err, "failed to execute template")
 }

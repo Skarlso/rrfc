@@ -9,19 +9,14 @@
 <link rel="stylesheet" type="text/css" href="/static/css/main.css">
 <script src="/static/js/disqus.js"></script>
 <body>
-    <?php
-        $content = file_get_contents(".rfc");
-        list($num, $desc) = explode(":", $content);
-    ?>
     <img id="background" src="/static/img/background_1.png">
     <div class="center">
         <h1 id="number">
-            <?php print($num); ?>
+            2706
         </h1>
         <h1 id="description">
-            <?php print($desc); ?>
+            ECML v1: Field Names for E-Commerce. D. Eastlake 3rd, T. Goldstein.
         </h1>
-        <a href="previous.php"><small>Previous RFCS</small></a>
     </div>
     <div class="center" id="disqus_thread"></div>
     <noscript>

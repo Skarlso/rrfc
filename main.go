@@ -22,6 +22,8 @@ func main() {
 	rfcs := rfc.parseListConcurrent(filepath.Join(FilePath, "list.txt"))
 	pgStore.StoreList(rfcs)
 
-	rfc.WriteOutRandomRFC()
+	rrfc := rfc.GetRandomRFC()
 	rfc.WriteOutAllPreviousRFCHTML()
+	rfc.WriteOutPreviousHTML()
+	rfc.WriteOutIndexHTML(rrfc)
 }

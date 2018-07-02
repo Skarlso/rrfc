@@ -17,11 +17,11 @@ That's about it
 
 The backend is powered by Go. It downloads the list and stores it in a postgres database for later parsing.
 
-The randomly selected rfc is stored in a file which is loaded by the front-end. Why a file? So I can use an almost static page and so I don't have to access the postgres database in the front-end.
+The randomly selected rfc is then used to generate the index file for the project which is a simple static html file.
 
 # Frontend
 
-The front-end is a lightweight semi static php app. The php is only to access the file. The preivous php pages are all statically generated from a Go html template file. The disqus links are the only one that are dynamic. Each rfc should have its own disqus link.
+The front-end is a lightweight static HTML app. All files are generated using Go html template files. The disqus links are the only one that are dynamic. Each rfc should have its own disqus link.
 
 # Deplyoment
 
@@ -33,7 +33,7 @@ To deploy the stack use:
 docker stack deploy -c docker-cloud.yml rrfc
 ```
 
-The stack will create a postgres database and the rrfc application by running rrfc once. That will initialize the database, create the necessary tables and fill it up with the current available rfcs.
+The stack will create a postgres database and the rrfc application by running rrfc once. That will initialize the database, create the necessary tables and fill it up with the current available rfcs and generate the index and previous html files.
 
 It's worth noting that postgres will do a bind mount outside into `/data` in order to persist it's database.
 

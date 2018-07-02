@@ -56,13 +56,13 @@ func TestParseListConcurrent(t *testing.T) {
 	}
 }
 
-func TestWriteOutRandomRFC(t *testing.T) {
+func TestGetRandomRFC(t *testing.T) {
 	rfc := new(RFC)
 	ds := new(dummyStore)
 	ds.RFC = RFC{Number: "0001", Description: "Description"}
 	ds.Error = nil
 	rfc.SetStore(ds)
-	rfc.WriteOutRandomRFC()
+	rfc.GetRandomRFC()
 	content, err := ioutil.ReadFile(".rfc")
 	if err != nil {
 		t.Fatal(".rfc file not found")
@@ -72,7 +72,7 @@ func TestWriteOutRandomRFC(t *testing.T) {
 	}
 }
 
-func TestWriteOutRandomRFCFailLoadRandom(t *testing.T) {
+func TestGetRandomRFCFailLoadRandom(t *testing.T) {
 	called := false
 	logFatal = func(...interface{}) {
 		called = true
@@ -82,23 +82,7 @@ func TestWriteOutRandomRFCFailLoadRandom(t *testing.T) {
 	ds.RFC = RFC{Number: "0001", Description: "Description"}
 	ds.Error = errors.New("failed")
 	rfc.SetStore(ds)
-	rfc.WriteOutRandomRFC()
-	if !called {
-		t.Fatal("logFatal was not called")
-	}
-}
-
-func TestWriteOutRandomRFCFailWritingFile(t *testing.T) {
-	os.Setenv("RFC_FILENAME", "")
-	called := false
-	logFatal = func(...interface{}) {
-		called = true
-	}
-	rfc := new(RFC)
-	ds := new(dummyStore)
-	ds.Error = nil
-	rfc.SetStore(ds)
-	rfc.WriteOutRandomRFC()
+	rfc.GetRandomRFC()
 	if !called {
 		t.Fatal("logFatal was not called")
 	}
@@ -115,7 +99,7 @@ func TestWriteOutRandomStoringRFCWorks(t *testing.T) {
 	ds.RFC = RFC{Number: "0001", Description: "Description"}
 	ds.Error = nil
 	rfc.SetStore(ds)
-	rfc.WriteOutRandomRFC()
+	rfc.GetRandomRFC()
 	if called {
 		t.Fatal("logFatal was called")
 	}
