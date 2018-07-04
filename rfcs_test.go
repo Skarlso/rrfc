@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -56,22 +55,6 @@ func TestParseListConcurrent(t *testing.T) {
 	}
 }
 
-func TestGetRandomRFC(t *testing.T) {
-	rfc := new(RFC)
-	ds := new(dummyStore)
-	ds.RFC = RFC{Number: "0001", Description: "Description"}
-	ds.Error = nil
-	rfc.SetStore(ds)
-	rfc.GetRandomRFC()
-	content, err := ioutil.ReadFile(".rfc")
-	if err != nil {
-		t.Fatal(".rfc file not found")
-	}
-	if string(content) != "0001:Description" {
-		t.Fatal("content did not equal expected. was: ", string(content))
-	}
-}
-
 func TestGetRandomRFCFailLoadRandom(t *testing.T) {
 	called := false
 	logFatal = func(...interface{}) {
@@ -89,7 +72,6 @@ func TestGetRandomRFCFailLoadRandom(t *testing.T) {
 }
 
 func TestWriteOutRandomStoringRFCWorks(t *testing.T) {
-	os.Setenv("RFC_FILENAME", ".rfc")
 	called := false
 	logFatal = func(...interface{}) {
 		called = true
@@ -99,7 +81,10 @@ func TestWriteOutRandomStoringRFCWorks(t *testing.T) {
 	ds.RFC = RFC{Number: "0001", Description: "Description"}
 	ds.Error = nil
 	rfc.SetStore(ds)
-	rfc.GetRandomRFC()
+	rrfc := rfc.GetRandomRFC()
+	if ds.RFC.Description != rrfc.Description && ds.RFC.Number != rrfc.Number {
+		t.Fatal("retrieved rfc does not match single created one")
+	}
 	if called {
 		t.Fatal("logFatal was called")
 	}
